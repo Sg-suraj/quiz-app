@@ -1,11 +1,14 @@
 // src/App.jsx
 
+// UPDATED: Import ResultsSummary
+import ResultsSummary from './components/ResultsSummary';
 import { useQuiz } from './contexts/QuizContext';
 import QuestionCard from './components/QuestionCard';
 import './assets/styles/App.css';
 
 function App() {
-  const { status, index, questions, answer, dispatch, points, maxPossiblePoints } = useQuiz();
+  // UPDATED: Destructure 'highscore' and 'answers' from the context
+  const { status, index, questions, answer, answers, dispatch, points, highscore, maxPossiblePoints } = useQuiz();
 
   const numQuestions = questions.length;
   const currentQuestion = questions[index];
@@ -60,12 +63,19 @@ function App() {
               You scored <strong>{points}</strong> out of{' '}
               {maxPossiblePoints} points.
             </p>
+            
+            {/* ADDED: Display the high score */}
+            <p className="highscore">(High Score: {highscore} points)</p>
+
             <button
               className="btn"
               onClick={() => dispatch({ type: 'restart' })}
             >
               Restart Quiz
             </button>
+
+            {/* ADDED: Display the detailed results summary */}
+            <ResultsSummary questions={questions} answers={answers} />
           </>
         )}
       </main>
