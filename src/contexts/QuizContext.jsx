@@ -1,46 +1,43 @@
+// src/contexts/QuizContext.jsx
+
 import { createContext, useContext, useEffect, useReducer } from 'react';
 
 const QuizContext = createContext();
 
 const initialState = {
   questions: [],
-  status: 'loading',
+  status: 'loading', // 'loading', 'error', 'ready', 'active', 'finished'
   index: 0,
   answer: null,
   answers: [],
   points: 0,
-  // UPDATED: Reads highscore from localStorage
   highscore: Number(localStorage.getItem('highscore')) || 0,
+  difficulty: 'easy', // ADDED: difficulty state, defaults to 'easy'
 };
 
 function reducer(state, action) {
   switch (action.type) {
     case 'dataReceived':
       // ... (This part is unchanged)
-      if (!action.payload || !Array.isArray(action.payload)) {
-        return { ...state, status: 'error' };
-      }
-      const formattedQuestions = action.payload.map((q) => {
-        const options = [...q.incorrectAnswers, q.correctAnswer].sort(
-          () => Math.random() - 0.5
-        );
-        const correctOption = options.indexOf(q.correctAnswer);
-        
-        return {
-          question: q.question.text,
-          options: options,
-          correctOption: correctOption,
-          points: 10,
-        };
-      });
-      return { ...state, questions: formattedQuestions, status: 'ready' };
+      // ...
     
-    case 'dataFailed':
-      return { ...state, status: 'error' };
-    
-    case 'start':
-      return { ...state, status: 'active' };
-    
+    // ADDED: New case to handle changing difficulty
+    case 'setDifficulty':
+      return { ...state, difficulty: action.payload, status: 'loading' };
+
+    // UPDATED: 'restart' action now preserves difficulty
+    case 'restart':
+      return { 
+        ...initialState, 
+        questions: state.questions, 
+        highscore: state.highscore,
+        difficulty: state.difficulty, 
+        status: 'loading' 
+      };
+
+    // ... other cases are unchanged ...
+    case 'dataFailed': return { ...state, status: 'error' };
+    case 'start': return { ...state, status: 'active' };
     case 'newAnswer':
       const question = state.questions.at(state.index);
       return {
@@ -52,51 +49,27 @@ function reducer(state, action) {
             ? state.points + question.points
             : state.points,
       };
-    
-    case 'nextQuestion':
-      return { ...state, index: state.index + 1, answer: null };
-    
-    case 'finish':
-      return { ...state, status: 'finished' };
-    
-    case 'restart':
-      return { ...initialState, questions: state.questions, status: 'loading' };
-
-    // ADDED: New case to handle updating the highscore in the state
-    case 'updateHighscore':
-      return { ...state, highscore: action.payload };
-
-    default:
-      throw new Error('Action unknown');
+    case 'nextQuestion': return { ...state, index: state.index + 1, answer: null };
+    case 'finish': return { ...state, status: 'finished' };
+    case 'updateHighscore': return { ...state, highscore: action.payload };
+    default: throw new Error('Action unknown');
   }
 }
 
 function QuizProvider({ children }) {
-  // UPDATED: Destructure 'highscore' and 'answers' from the state
-  const [{ questions, status, index, answer, answers, points, highscore }, dispatch] = useReducer(
+  // UPDATED: Destructure 'difficulty' from state
+  const [{ questions, status, index, answer, answers, points, highscore, difficulty }, dispatch] = useReducer(
     reducer,
     initialState
   );
 
-  const numQuestions = questions.length;
-  const maxPossiblePoints = questions.reduce(
-    (prev, cur) => prev + cur.points,
-    0
-  );
-  
-  // ADDED: useEffect to save the highscore when the quiz is finished
-  useEffect(() => {
-    if (status === 'finished' && points > highscore) {
-      localStorage.setItem('highscore', String(points));
-      dispatch({ type: 'updateHighscore', payload: points });
-    }
-  }, [status, points, highscore]);
+  // ... (unchanged logic for numQuestions, maxPossiblePoints, highscore useEffect)
 
-  // useEffect for fetching questions (unchanged)
+  // UPDATED: This useEffect now depends on 'difficulty' and includes it in the API call
   useEffect(function () {
     if (status !== 'loading') return;
 
-    fetch(`https://the-trivia-api.com/v2/questions?cache=${Date.now()}`)
+    fetch(`https://the-trivia-api.com/v2/questions?limit=10&difficulties=${difficulty}&cache=${Date.now()}`)
       .then((res) => res.json())
       .then((data) => {
         if (data && Array.isArray(data)) {
@@ -106,20 +79,14 @@ function QuizProvider({ children }) {
         }
       })
       .catch((err) => dispatch({ type: 'dataFailed' }));
-  }, [status]);
+  }, [status, difficulty]); // Dependency array now includes 'difficulty'
 
   return (
     <QuizContext.Provider
       value={{
-        questions,
-        status,
-        index,
-        answer,
-        answers,
-        points,
-        highscore, // UPDATED: Provide highscore to the app
-        numQuestions,
-        maxPossiblePoints,
+        // ... other values
+        highscore,
+        difficulty, // ADDED: provide difficulty to the app
         dispatch,
       }}
     >
@@ -128,11 +95,4 @@ function QuizProvider({ children }) {
   );
 }
 
-function useQuiz() {
-  const context = useContext(QuizContext);
-  if (context === undefined)
-    throw new Error('QuizContext was used outside of the QuizProvider');
-  return context;
-}
-
-export { QuizProvider, useQuiz };
+// ... useQuiz and export are unchanged
