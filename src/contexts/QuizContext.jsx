@@ -2,13 +2,14 @@ import { createContext, useContext, useEffect, useReducer } from 'react';
 
 const QuizContext = createContext();
 
-// src/contexts/QuizContext.jsx
-
 const initialState = {
-  //... other properties
+  questions: [],
+  status: 'loading',
+  index: 0,
+  answer: null,
   answers: [],
   points: 0,
-  // Read highscore from localStorage, default to 0 if not found
+  // UPDATED: Reads highscore from localStorage
   highscore: Number(localStorage.getItem('highscore')) || 0,
 };
 
@@ -41,11 +42,11 @@ function reducer(state, action) {
       return { ...state, status: 'active' };
     
     case 'newAnswer':
-      // ... (This part is unchanged)
       const question = state.questions.at(state.index);
       return {
         ...state,
         answer: action.payload,
+        answers: [...state.answers, action.payload],
         points:
           action.payload === question.correctOption
             ? state.points + question.points
@@ -59,17 +60,20 @@ function reducer(state, action) {
       return { ...state, status: 'finished' };
     
     case 'restart':
-      // UPDATED: Now resets the entire state, including questions, back to the beginning
-      // This will trigger the useEffect to fetch new questions
-      return { ...initialState, status: 'loading' };
-    
+      return { ...initialState, questions: state.questions, status: 'loading' };
+
+    // ADDED: New case to handle updating the highscore in the state
+    case 'updateHighscore':
+      return { ...state, highscore: action.payload };
+
     default:
       throw new Error('Action unknown');
   }
 }
 
 function QuizProvider({ children }) {
-  const [{ questions, status, index, answer, points }, dispatch] = useReducer(
+  // UPDATED: Destructure 'highscore' and 'answers' from the state
+  const [{ questions, status, index, answer, answers, points, highscore }, dispatch] = useReducer(
     reducer,
     initialState
   );
@@ -79,8 +83,16 @@ function QuizProvider({ children }) {
     (prev, cur) => prev + cur.points,
     0
   );
+  
+  // ADDED: useEffect to save the highscore when the quiz is finished
+  useEffect(() => {
+    if (status === 'finished' && points > highscore) {
+      localStorage.setItem('highscore', String(points));
+      dispatch({ type: 'updateHighscore', payload: points });
+    }
+  }, [status, points, highscore]);
 
-  // UPDATED: This useEffect now runs whenever the 'status' changes to 'loading'
+  // useEffect for fetching questions (unchanged)
   useEffect(function () {
     if (status !== 'loading') return;
 
@@ -94,7 +106,7 @@ function QuizProvider({ children }) {
         }
       })
       .catch((err) => dispatch({ type: 'dataFailed' }));
-  }, [status]); // Dependency array now includes 'status'
+  }, [status]);
 
   return (
     <QuizContext.Provider
@@ -103,7 +115,9 @@ function QuizProvider({ children }) {
         status,
         index,
         answer,
+        answers,
         points,
+        highscore, // UPDATED: Provide highscore to the app
         numQuestions,
         maxPossiblePoints,
         dispatch,
