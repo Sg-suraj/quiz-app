@@ -1,0 +1,42 @@
+[
+  {
+    "question": "Which programming language is known as the language of the web?",
+    "options": ["Python", "Java", "JavaScript", "C++"],
+    "correctOption": 2,
+    "points": 10
+  },
+  {
+    "question": "What does CSS stand for?",
+    "options": [
+      "Cascading Style Sheets",
+      "Creative Style Sheets",
+      "Computer Style Sheets",
+      "Colorful Style Sheets"
+    ],
+    "correctOption": 0,
+    "points": 10
+  },
+  {
+    "question": "Which company developed React?",
+    "options": ["Google", "Microsoft", "Facebook", "Apple"],
+    "correctOption": 2,
+    "points": 10
+  },
+  {
+    "question": "What is the command to create a new React app using Vite?",
+    "options": [
+      "npm init react-app",
+      "npx create-react-app",
+      "npm create vite@latest",
+      "npm new react"
+    ],
+    "correctOption": 2,
+    "points": 20
+  },
+  {
+    "question": "What hook is used to perform side effects in a function component?",
+    "options": ["useState", "useEffect", "useContext", "useReducer"],
+    "correctOption": 1,
+    "points": 20
+  }
+]

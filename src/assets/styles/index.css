@@ -1,0 +1,23 @@
+:root {
+  --color-bg: #2d2d34;
+  --color-primary: #1f2128;
+  --color-text: #f4f4f4;
+  --color-accent: #646cff;
+  --color-correct: #4ade80;
+  --color-wrong: #f87171;
+  font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  background-color: var(--color-bg);
+  color: var(--color-text);
+  display: flex;
+  justify-content: center;
+  padding: 2rem;
+}
