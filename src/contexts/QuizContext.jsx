@@ -7,7 +7,7 @@ const initialState = {
   // 'loading', 'error', 'ready', 'active', 'finished'
   status: 'loading',
   index: 0,
-  answer: null,
+  answers: [],
   points: 0,
 };
 
