@@ -2,13 +2,14 @@ import { createContext, useContext, useEffect, useReducer } from 'react';
 
 const QuizContext = createContext();
 
+// src/contexts/QuizContext.jsx
+
 const initialState = {
-  questions: [],
-  // 'loading', 'error', 'ready', 'active', 'finished'
-  status: 'loading',
-  index: 0,
+  //... other properties
   answers: [],
   points: 0,
+  // Read highscore from localStorage, default to 0 if not found
+  highscore: Number(localStorage.getItem('highscore')) || 0,
 };
 
 function reducer(state, action) {
