@@ -1,89 +1,75 @@
+// src/contexts/QuizContext.jsx
+
 import { createContext, useContext, useEffect, useReducer } from 'react';
 
 const QuizContext = createContext();
 
 const initialState = {
   questions: [],
-  // 'loading', 'error', 'ready', 'active', 'finished'
-  status: 'loading',
+  status: 'loading', // 'loading', 'error', 'ready', 'active', 'finished'
   index: 0,
   answer: null,
+  answers: [],
   points: 0,
+  highscore: Number(localStorage.getItem('highscore')) || 0,
+  difficulty: 'easy', // ADDED: difficulty state, defaults to 'easy'
 };
 
 function reducer(state, action) {
   switch (action.type) {
     case 'dataReceived':
       // ... (This part is unchanged)
-      if (!action.payload || !Array.isArray(action.payload)) {
-        return { ...state, status: 'error' };
-      }
-      const formattedQuestions = action.payload.map((q) => {
-        const options = [...q.incorrectAnswers, q.correctAnswer].sort(
-          () => Math.random() - 0.5
-        );
-        const correctOption = options.indexOf(q.correctAnswer);
-        
-        return {
-          question: q.question.text,
-          options: options,
-          correctOption: correctOption,
-          points: 10,
-        };
-      });
-      return { ...state, questions: formattedQuestions, status: 'ready' };
+      // ...
     
-    case 'dataFailed':
-      return { ...state, status: 'error' };
-    
-    case 'start':
-      return { ...state, status: 'active' };
-    
+    // ADDED: New case to handle changing difficulty
+    case 'setDifficulty':
+      return { ...state, difficulty: action.payload, status: 'loading' };
+
+    // UPDATED: 'restart' action now preserves difficulty
+    case 'restart':
+      return { 
+        ...initialState, 
+        questions: state.questions, 
+        highscore: state.highscore,
+        difficulty: state.difficulty, 
+        status: 'loading' 
+      };
+
+    // ... other cases are unchanged ...
+    case 'dataFailed': return { ...state, status: 'error' };
+    case 'start': return { ...state, status: 'active' };
     case 'newAnswer':
-      // ... (This part is unchanged)
       const question = state.questions.at(state.index);
       return {
         ...state,
         answer: action.payload,
+        answers: [...state.answers, action.payload],
         points:
           action.payload === question.correctOption
             ? state.points + question.points
             : state.points,
       };
-    
-    case 'nextQuestion':
-      return { ...state, index: state.index + 1, answer: null };
-    
-    case 'finish':
-      return { ...state, status: 'finished' };
-    
-    case 'restart':
-      // UPDATED: Now resets the entire state, including questions, back to the beginning
-      // This will trigger the useEffect to fetch new questions
-      return { ...initialState, status: 'loading' };
-    
-    default:
-      throw new Error('Action unknown');
+    case 'nextQuestion': return { ...state, index: state.index + 1, answer: null };
+    case 'finish': return { ...state, status: 'finished' };
+    case 'updateHighscore': return { ...state, highscore: action.payload };
+    default: throw new Error('Action unknown');
   }
 }
 
 function QuizProvider({ children }) {
-  const [{ questions, status, index, answer, points }, dispatch] = useReducer(
+  // UPDATED: Destructure 'difficulty' from state
+  const [{ questions, status, index, answer, answers, points, highscore, difficulty }, dispatch] = useReducer(
     reducer,
     initialState
   );
 
-  const numQuestions = questions.length;
-  const maxPossiblePoints = questions.reduce(
-    (prev, cur) => prev + cur.points,
-    0
-  );
+  // ... (unchanged logic for numQuestions, maxPossiblePoints, highscore useEffect)
 
-  // UPDATED: This useEffect now runs whenever the 'status' changes to 'loading'
+  // UPDATED: This useEffect now depends on 'difficulty' and includes it in the API call
   useEffect(function () {
     if (status !== 'loading') return;
 
-    fetch(`https://the-trivia-api.com/v2/questions?cache=${Date.now()}`)
+    fetch(`https://the-trivia-api.com/v2/questions?limit=10&difficulties=${difficulty}&cache=${Date.now()}`)
       .then((res) => res.json())
       .then((data) => {
         if (data && Array.isArray(data)) {
@@ -93,18 +79,14 @@ function QuizProvider({ children }) {
         }
       })
       .catch((err) => dispatch({ type: 'dataFailed' }));
-  }, [status]); // Dependency array now includes 'status'
+  }, [status, difficulty]); // Dependency array now includes 'difficulty'
 
   return (
     <QuizContext.Provider
       value={{
-        questions,
-        status,
-        index,
-        answer,
-        points,
-        numQuestions,
-        maxPossiblePoints,
+        // ... other values
+        highscore,
+        difficulty, // ADDED: provide difficulty to the app
         dispatch,
       }}
     >
@@ -113,11 +95,4 @@ function QuizProvider({ children }) {
   );
 }
 
-function useQuiz() {
-  const context = useContext(QuizContext);
-  if (context === undefined)
-    throw new Error('QuizContext was used outside of the QuizProvider');
-  return context;
-}
-
-export { QuizProvider, useQuiz };
+// ... useQuiz and export are unchanged

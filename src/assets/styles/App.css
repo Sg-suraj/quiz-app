@@ -62,3 +62,101 @@
   color: var(--color-primary);
   transform: translateX(10px);
 }
+
+.highscore {
+  font-size: 1.1rem;
+  margin-top: -1rem;
+  margin-bottom: 2rem;
+  color: var(--color-text-light);
+}
+
+/* --- ADDED STYLES --- */
+.difficulty-selector {
+  margin-top: 2rem;
+  padding-top: 2rem;
+  border-top: 1px solid #e2e8f0;
+  width: 100%;
+  text-align: center;
+}
+
+.difficulty-selector h4 {
+  margin-bottom: 1rem;
+  font-weight: 500;
+  color: var(--color-text-light);
+}
+
+.difficulty-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+}
+
+.btn-difficulty {
+  text-transform: capitalize;
+  background-color: #f8fafc;
+  border-color: #e2e8f0;
+  color: var(--color-text-light);
+}
+
+.btn-difficulty:hover {
+  background-color: var(--color-accent);
+  border-color: var(--color-accent);
+  color: white;
+}
+
+.btn-difficulty.active {
+  background-color: var(--color-accent);
+  border-color: var(--color-accent);
+  color: white;
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-sm);
+}
+
+/* Styles for the Results Summary */
+.results-summary {
+  width: 100%;
+  margin-top: 3rem;
+  text-align: left;
+  border-top: 1px solid #e2e8f0;
+  padding-top: 2rem;
+}
+
+.results-summary h3 {
+  margin-bottom: 1.5rem;
+  font-size: 1.5rem;
+  color: var(--color-text);
+}
+
+.summary-item {
+  list-style: none;
+  background-color: #f8fafc;
+  padding: 1.5rem;
+  border-radius: var(--radius-md);
+  margin-bottom: 1rem;
+}
+
+.summary-question {
+  font-weight: 600;
+  margin-bottom: 1rem;
+}
+
+.summary-option {
+  padding: 0.5rem;
+  border-radius: 4px;
+  margin-bottom: 0.25rem;
+  opacity: 0.7;
+}
+
+.summary-option.correct {
+  background-color: #d1fae5;
+  color: #065f46;
+  font-weight: bold;
+  opacity: 1;
+}
+
+.summary-option.incorrect {
+  background-color: #fee2e2;
+  color: #991b1b;
+  text-decoration: line-through;
+  opacity: 1;
+}
