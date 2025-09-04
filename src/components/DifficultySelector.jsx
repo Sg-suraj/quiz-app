@@ -22,4 +22,8 @@ function DifficultySelector({ difficulty, dispatch }) {
   );
 }
 
+<<<<<<< HEAD
 export default DifficultySelector;
+=======
+export default DifficultySelector;
+>>>>>>> 31cae98fddbc7c031c2a769b3ffded98e990783f

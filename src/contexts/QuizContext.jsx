@@ -95,4 +95,8 @@ function QuizProvider({ children }) {
   );
 }
 
+<<<<<<< HEAD
 // ... useQuiz and export are unchanged
+=======
+// ... useQuiz and export are unchanged
+>>>>>>> 31cae98fddbc7c031c2a769b3ffded98e990783f
