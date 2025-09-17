@@ -2,15 +2,8 @@
 
 A dynamic and interactive quiz application built with React. This project was developed as a front-end technical assessment to demonstrate core React principles, modern state management techniques, and the ability to build a clean, responsive, and user-friendly interface.
 
----
 
 
-
-*(Replace the link above with your final Vercel URL)*
-
-![Quiz App Screenshot](./screenshot.png)
-
-*(To add a screenshot: 1. Take a screenshot of your running app. 2. Name the file `screenshot.png`. 3. Place it in the root directory of your project.)*
 
 ## Features
 
